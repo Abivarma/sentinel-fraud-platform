@@ -1,0 +1,4 @@
+# IMPORTANT: pyspark and delta-spark versions are pinned together.
+# delta-spark==3.2.0 requires pyspark==3.5.x — do not change independently.
+pyspark==3.5.1
+delta-spark==3.2.0

@@ -1,0 +1,282 @@
+version: "3.9"
+
+x-spark-env: &spark-env
+  MINIO_ENDPOINT: ${MINIO_ENDPOINT:-http://minio:9000}
+  AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-sentinel}
+  AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-changeme_minio}
+
+x-airflow-env: &airflow-env
+  AIRFLOW__CORE__EXECUTOR: LocalExecutor
+  AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW__DATABASE__SQL_ALCHEMY_CONN:-postgresql+psycopg2://airflow:airflow@postgres:5432/airflow}
+  AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY:-}
+  AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+  AIRFLOW__WEBSERVER__SECRET_KEY: sentinel-secret
+  AIRFLOW__LOGGING__LOGGING_LEVEL: WARNING
+  MINIO_ENDPOINT: ${MINIO_ENDPOINT:-http://minio:9000}
+  AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-sentinel}
+  AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-changeme_minio}
+
+services:
+
+  # STORAGE
+  minio:
+    image: quay.io/minio/minio:RELEASE.2024-11-07T00-52-20Z
+    container_name: sentinel-minio
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-sentinel}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-changeme_minio}
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  minio-init:
+    image: quay.io/minio/mc:latest
+    container_name: sentinel-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-sentinel}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-changeme_minio}
+    entrypoint: >
+      /bin/sh -c "
+        mc alias set local http://minio:9000 $${MINIO_ROOT_USER} $${MINIO_ROOT_PASSWORD} &&
+        mc mb --ignore-existing local/lake &&
+        mc mb --ignore-existing local/mlflow &&
+        echo 'MinIO init complete'
+      "
+    restart: "no"
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: sentinel-postgres
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./deploy/docker/postgres-init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  # STREAMING
+  redpanda:
+    image: redpandadata/redpanda:v23.3.21
+    container_name: sentinel-redpanda
+    command:
+      - redpanda
+      - start
+      - --smp=2
+      - --memory=2G
+      - --reserve-memory=200M
+      - --node-id=0
+      - --check=false
+      - --kafka-addr=PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:19092
+      - --advertise-kafka-addr=PLAINTEXT://redpanda:9092,PLAINTEXT_HOST://localhost:19092
+      - --pandaproxy-addr=0.0.0.0:8082
+      - --advertise-pandaproxy-addr=localhost:8082
+      - --schema-registry-addr=0.0.0.0:8081
+    ports:
+      - "19092:19092"
+      - "8082:8082"
+      - "8081:8081"
+      - "9644:9644"
+    volumes:
+      - redpanda_data:/var/lib/redpanda/data
+    healthcheck:
+      test: ["CMD-SHELL", "rpk cluster info --brokers=localhost:9092 || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+    restart: unless-stopped
+
+  redpanda-init:
+    image: redpandadata/redpanda:v23.3.21
+    container_name: sentinel-redpanda-init
+    depends_on:
+      redpanda:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+        rpk topic create transactions.raw --brokers=redpanda:9092 --partitions=6 --replicas=1 --if-not-exists &&
+        rpk topic create transactions.enriched --brokers=redpanda:9092 --partitions=6 --replicas=1 --if-not-exists &&
+        rpk topic create transactions.scored --brokers=redpanda:9092 --partitions=6 --replicas=1 --if-not-exists &&
+        echo 'Redpanda init complete'
+      "
+    restart: "no"
+
+  # COMPUTE
+  spark-master:
+    image: bitnami/spark:3.5.1
+    container_name: sentinel-spark-master
+    environment:
+      <<: *spark-env
+      SPARK_MODE: master
+      SPARK_MASTER_OPTS: "-Dspark.deploy.defaultCores=4"
+    ports:
+      - "8080:8080"
+      - "7077:7077"
+      - "4040:4040"
+    volumes:
+      - ./pipelines/spark:/opt/spark/jobs:ro
+      - ./data:/workspace/data
+      - ./config/spark/spark-defaults.conf:/opt/bitnami/spark/conf/spark-defaults.conf:ro
+    restart: unless-stopped
+
+  spark-worker:
+    image: bitnami/spark:3.5.1
+    container_name: sentinel-spark-worker
+    environment:
+      <<: *spark-env
+      SPARK_MODE: worker
+      SPARK_MASTER_URL: spark://spark-master:7077
+      SPARK_WORKER_MEMORY: ${SPARK_EXECUTOR_MEMORY:-4g}
+      SPARK_WORKER_CORES: ${SPARK_EXECUTOR_CORES:-4}
+    depends_on:
+      - spark-master
+    volumes:
+      - ./pipelines/spark:/opt/spark/jobs:ro
+      - ./data:/workspace/data
+      - ./config/spark/spark-defaults.conf:/opt/bitnami/spark/conf/spark-defaults.conf:ro
+    restart: unless-stopped
+
+  # ORCHESTRATION
+  airflow-init:
+    image: apache/airflow:2.9.3-python3.11
+    container_name: sentinel-airflow-init
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      <<: *airflow-env
+      _AIRFLOW_DB_MIGRATE: "true"
+      _AIRFLOW_WWW_USER_CREATE: "true"
+      _AIRFLOW_WWW_USER_USERNAME: admin
+      _AIRFLOW_WWW_USER_PASSWORD: admin
+      _AIRFLOW_WWW_USER_EMAIL: admin@sentinel.local
+    user: "${AIRFLOW_UID:-50000}:0"
+    entrypoint: /bin/bash
+    command: -c "airflow db migrate && airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@sentinel.local 2>/dev/null || true"
+    restart: "no"
+
+  airflow-webserver:
+    image: apache/airflow:2.9.3-python3.11
+    container_name: sentinel-airflow-webserver
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    command: webserver
+    ports:
+      - "8081:8080"
+    environment:
+      <<: *airflow-env
+    user: "${AIRFLOW_UID:-50000}:0"
+    volumes:
+      - ./pipelines/airflow/dags:/opt/airflow/dags:ro
+      - ./pipelines/airflow/plugins:/opt/airflow/plugins:ro
+      - airflow_logs:/opt/airflow/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+  airflow-scheduler:
+    image: apache/airflow:2.9.3-python3.11
+    container_name: sentinel-airflow-scheduler
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    command: scheduler
+    environment:
+      <<: *airflow-env
+    user: "${AIRFLOW_UID:-50000}:0"
+    volumes:
+      - ./pipelines/airflow/dags:/opt/airflow/dags:ro
+      - ./pipelines/airflow/plugins:/opt/airflow/plugins:ro
+      - airflow_logs:/opt/airflow/logs
+    restart: unless-stopped
+
+  # ONLINE STORE
+  redis:
+    image: redis:7.2-alpine
+    container_name: sentinel-redis
+    command: >
+      redis-server
+      --requirepass ${REDIS_PASSWORD:-changeme_redis}
+      --maxmemory 2gb
+      --maxmemory-policy allkeys-lru
+      --save 60 1000
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-changeme_redis}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ML TRACKING
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.13.2
+    container_name: sentinel-mlflow
+    command: >
+      mlflow server
+      --host 0.0.0.0
+      --port 5000
+      --backend-store-uri postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      --default-artifact-root s3://mlflow/artifacts
+    ports:
+      - "5000:5000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+    environment:
+      MLFLOW_S3_ENDPOINT_URL: ${MINIO_ENDPOINT:-http://minio:9000}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-sentinel}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-changeme_minio}
+    restart: unless-stopped
+
+  # SYNTHETIC PRODUCER (opt-in: docker compose --profile streaming up)
+  synthetic-producer:
+    build:
+      context: ./streaming/producer
+      dockerfile: Dockerfile
+    container_name: sentinel-producer
+    depends_on:
+      redpanda:
+        condition: service_healthy
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-redpanda:9092}
+      KAFKA_TOPIC_RAW: ${KAFKA_TOPIC_RAW:-transactions.raw}
+      PRODUCER_RATE_PER_SECOND: ${PRODUCER_RATE_PER_SECOND:-500}
+      PRODUCER_FRAUD_RATE: ${PRODUCER_FRAUD_RATE:-0.015}
+    profiles:
+      - streaming
+    restart: unless-stopped
+
+volumes:
+  minio_data:
+  redpanda_data:
+  postgres_data:
+  airflow_logs:
+  redis_data:

@@ -1,0 +1,7 @@
+{
+  "total": 9,
+  "passed": 9,
+  "failed": 0,
+  "failures": [],
+  "note": "Each ADR references at least 3 alternatives with rejection reasons"
+}

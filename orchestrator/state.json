@@ -1,0 +1,27 @@
+{
+  "project": "sentinel-fraud-platform",
+  "phases": {
+    "00": {"name": "Problem identification", "status": "PENDING", "depends_on": []},
+    "01": {"name": "Solution landscape", "status": "PENDING", "depends_on": ["00"]},
+    "02": {"name": "Data acquisition & EDA", "status": "PENDING", "depends_on": ["00"]},
+    "03": {"name": "Bronze ingestion", "status": "PENDING", "depends_on": ["02"]},
+    "04": {"name": "Silver cleaning", "status": "PENDING", "depends_on": ["03"]},
+    "05": {"name": "Streaming infrastructure", "status": "PENDING", "depends_on": ["03"]},
+    "06": {"name": "Gold features", "status": "PENDING", "depends_on": ["04", "05"]},
+    "07": {"name": "Feature store", "status": "PENDING", "depends_on": ["06"]},
+    "08": {"name": "ML training", "status": "PENDING", "depends_on": ["06"]},
+    "09": {"name": "ML evaluation", "status": "PENDING", "depends_on": ["08"]},
+    "10": {"name": "Streaming inference", "status": "PENDING", "depends_on": ["05", "07", "08"]},
+    "11": {"name": "Vector store", "status": "PENDING", "depends_on": ["04"]},
+    "12": {"name": "Agentic investigator", "status": "PENDING", "depends_on": ["10", "11"]},
+    "13": {"name": "Guardrails", "status": "PENDING", "depends_on": ["12"]},
+    "14": {"name": "Evaluation harness", "status": "PENDING", "depends_on": ["09", "13"]},
+    "15": {"name": "Observability", "status": "PENDING", "depends_on": ["10", "12"]},
+    "16": {"name": "Serving API + UI", "status": "PENDING", "depends_on": ["10", "12", "13"]},
+    "17": {"name": "Deployment + CI", "status": "PENDING", "depends_on": ["16"]},
+    "18": {"name": "Documentation", "status": "PENDING", "depends_on": ["17"]},
+    "19": {"name": "Interview pack", "status": "PENDING", "depends_on": ["18"]}
+  },
+  "last_updated": null,
+  "alignment_gate_failures": {}
+}

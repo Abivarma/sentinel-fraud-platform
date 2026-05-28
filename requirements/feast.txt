@@ -1,0 +1,4 @@
+feast==0.40.1
+feast[spark]
+feast[redis]
+redis==5.0.4

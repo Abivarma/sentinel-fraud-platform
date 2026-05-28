@@ -1,0 +1,20 @@
+{
+  "ieee_cis/train_transaction.csv": {
+    "sha256": "to_be_filled_after_first_download",
+    "rows": 590540,
+    "size_mb": 563,
+    "source": "kaggle:ieee-fraud-detection or HuggingFace fallback"
+  },
+  "ieee_cis/train_identity.csv": {
+    "sha256": "to_be_filled_after_first_download",
+    "rows": 144233,
+    "size_mb": 33,
+    "source": "kaggle:ieee-fraud-detection or HuggingFace fallback"
+  },
+  "paysim/PS_log.csv": {
+    "sha256": "to_be_filled_after_first_download",
+    "rows": 6362620,
+    "size_mb": 470,
+    "source": "HuggingFace dataset"
+  }
+}

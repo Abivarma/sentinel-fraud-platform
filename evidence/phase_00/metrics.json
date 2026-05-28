@@ -1,0 +1,17 @@
+{
+  "phase": "00",
+  "prd_metrics_addressed": [
+    {
+      "name": "Documented decisions",
+      "prd_target": "100% of major component choices have an ADR",
+      "measured_value": "1/22 ADRs complete (ADR-001)",
+      "evidence_chart": null,
+      "status": "in-progress"
+    }
+  ],
+  "additional_observations": [
+    "Domain: financial fraud detection",
+    "Business cost quantified: card fraud costs industry tens of billions annually",
+    "Analyst time baseline: 5-15 minutes per investigation case"
+  ]
+}
