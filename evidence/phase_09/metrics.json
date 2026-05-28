@@ -1,0 +1,8 @@
+{
+  "anomaly_rate": 0.01,
+  "fraud_recall_at_1pct": 0.142,
+  "anomaly_fraud_overlap": 0.063,
+  "precision_at_top1pct": 0.063,
+  "n_samples": 6952160,
+  "n_anomalies": 69521
+}

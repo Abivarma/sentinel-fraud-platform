@@ -170,6 +170,13 @@ phase-08:
 	$(VENV_PYTHON) ml/training/phase_08_train_xgboost.py
 	python scripts/generate_evidence.py --phase 08
 
+.PHONY: phase-09
+phase-09:
+	@echo "=== Phase 09: Isolation Forest Anomaly Detector ==="
+	@set -a && source .env && set +a && \
+	$(VENV_PYTHON) ml/training/phase_09_isolation_forest.py
+	python scripts/generate_evidence.py --phase 09
+
 .PHONY: phase-10
 phase-10:
 	@echo "=== Phase 10: LLM Fraud Explanations ==="
@@ -178,7 +185,7 @@ phase-10:
 	python scripts/generate_evidence.py --phase 10
 
 .PHONY: ml-layer
-ml-layer: phase-08 phase-10
+ml-layer: phase-08 phase-09 phase-10
 	@echo "=== ML + GenAI layer complete ==="
 
 .PHONY: phase-11
