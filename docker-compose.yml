@@ -256,6 +256,32 @@ services:
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-changeme_minio}
     restart: unless-stopped
 
+  # FRAUD SCORING API (opt-in: docker compose --profile serving up)
+  fraud-api:
+    build:
+      context: .
+      dockerfile: serving/Dockerfile
+    container_name: sentinel-fraud-api
+    ports:
+      - "8000:8000"
+    environment:
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      GROQ_MODEL: ${GROQ_MODEL:-llama-3.3-70b-versatile}
+      MINIO_ENDPOINT: ${MINIO_ENDPOINT:-http://minio:9000}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-sentinel}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-changeme_minio}
+    depends_on:
+      minio:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    profiles:
+      - serving
+
   # SYNTHETIC PRODUCER (opt-in: docker compose --profile streaming up)
   synthetic-producer:
     build:

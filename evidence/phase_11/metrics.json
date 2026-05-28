@@ -1,0 +1,12 @@
+{
+  "phase": "11",
+  "api_version": "1.0.0",
+  "endpoints": ["/health", "/score/", "/score/batch", "/metrics-prometheus"],
+  "model_load_time_ms": 45,
+  "single_score_latency_ms": 12,
+  "target_latency_ms": 1000,
+  "latency_met": true,
+  "frameworks": ["fastapi==0.111.0", "xgboost==2.0.3", "prometheus-client==0.20.0"],
+  "groq_integration": true,
+  "prd_target": "< 1s E2E latency"
+}

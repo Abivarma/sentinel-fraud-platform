@@ -181,6 +181,20 @@ phase-10:
 ml-layer: phase-08 phase-10
 	@echo "=== ML + GenAI layer complete ==="
 
+.PHONY: phase-11
+phase-11:
+	@echo "=== Phase 11: Real-Time Scoring API ==="
+	pip install -r requirements/serving.txt -q
+	@echo "Testing API imports..."
+	@set -a && source .env && set +a && \
+	python -c "from serving.api.predictor import FraudPredictor; p = FraudPredictor(); print('Model loaded OK')"
+	python scripts/generate_evidence.py --phase 11
+
+.PHONY: serve
+serve:
+	@set -a && source .env && set +a && \
+	uvicorn serving.api.main:app --host 0.0.0.0 --port 8000 --reload
+
 # ─── Observability ────────────────────────────────────────────────────────────
 .PHONY: infra-observability
 infra-observability:
