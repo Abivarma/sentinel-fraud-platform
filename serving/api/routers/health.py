@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 import os
 from ..models import HealthResponse
+from ..predictor import get_predictor
 
 router = APIRouter(tags=["ops"])
 
@@ -8,7 +9,6 @@ router = APIRouter(tags=["ops"])
 @router.get("/health", response_model=HealthResponse)
 async def health():
     try:
-        from ..predictor import get_predictor
         get_predictor()
         model_ok = True
     except Exception:

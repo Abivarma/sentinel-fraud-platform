@@ -12,6 +12,7 @@ from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_
 from starlette.responses import Response
 
 from .routers import score, health
+from .predictor import get_predictor
 
 REQUEST_COUNT = Counter(
     "sentinel_api_requests_total",
@@ -34,9 +35,7 @@ FRAUD_ALERTS = Counter("sentinel_fraud_alerts_total", "Transactions scored above
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Warm up model on startup
     try:
-        from .predictor import get_predictor
         get_predictor()
         print("Model loaded at startup")
     except Exception as e:
