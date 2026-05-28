@@ -1,0 +1,21 @@
+project: sentinel
+registry: s3://lake/feast/registry.db
+provider: local
+
+offline_store:
+  type: spark
+  spark_conf:
+    spark.master: "spark://spark-master:7077"
+    spark.sql.extensions: "io.delta.sql.DeltaSparkSessionExtension"
+    spark.sql.catalog.spark_catalog: "org.apache.spark.sql.delta.catalog.DeltaCatalog"
+    spark.delta.logStore.class: "org.apache.spark.sql.delta.storage.S3SingleDriverLogStore"
+    spark.hadoop.fs.s3a.impl: "org.apache.hadoop.fs.s3a.S3AFileSystem"
+    spark.hadoop.fs.s3a.path.style.access: "true"
+    spark.hadoop.fs.s3a.connection.ssl.enabled: "false"
+    spark.hadoop.fs.s3a.fast.upload: "true"
+
+online_store:
+  type: redis
+  connection_string: "redis:6379,password=changeme_redis"
+
+entity_key_serialization_version: 2

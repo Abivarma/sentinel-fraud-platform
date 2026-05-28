@@ -1,7 +1,7 @@
 """
 Generate evidence artifacts for a completed phase.
-Reads cached metrics from /tmp/sentinel_metrics/phase_NN.json (written by Spark jobs).
-Writes summary, metrics.json, tests/results.json, and alignment_check.md to evidence/phase_NN/.
+Reads cached metrics from /tmp/sentinel_metrics/phase_NN.json.
+Writes to evidence/phase_NN/.
 """
 
 import argparse
@@ -40,26 +40,19 @@ def write_evidence(phase: str, metrics: dict) -> str:
     results_path = phase_dir / "tests" / "results.json"
     if not results_path.exists():
         with open(results_path, "w") as f:
-            json.dump(
-                {
-                    "total": metrics.get("tests_total", 0),
-                    "passed": metrics.get("tests_passed", 0),
-                    "failed": metrics.get("tests_failed", 0),
-                    "failures": metrics.get("test_failures", []),
-                    "generated_at": datetime.utcnow().isoformat(),
-                },
-                f,
-                indent=2,
-            )
+            json.dump({
+                "total": metrics.get("tests_total", 0),
+                "passed": metrics.get("tests_passed", 0),
+                "failed": metrics.get("tests_failed", 0),
+                "failures": metrics.get("test_failures", []),
+                "generated_at": datetime.utcnow().isoformat(),
+            }, f, indent=2)
 
     verdict = "PASS" if metrics.get("tests_failed", 0) == 0 else "FAIL"
 
-    metric_rows = ""
+    rows = ""
     for m in metrics_out["prd_metrics_addressed"]:
-        metric_rows += (
-            f"| {m.get('name', '?')} | {m.get('prd_target', '?')} "
-            f"| {m.get('measured_value', 'N/A')} | {m.get('status', '?')} |\n"
-        )
+        rows += f"| {m.get('name','?')} | {m.get('prd_target','?')} | {m.get('measured_value','N/A')} | {m.get('status','?')} |\n"
 
     alignment = f"""# Alignment check — phase {phase}
 
@@ -70,7 +63,7 @@ def write_evidence(phase: str, metrics: dict) -> str:
 
 | Metric | Target | Measured | Status |
 |--------|--------|----------|--------|
-{metric_rows}
+{rows}
 ## Tests
 - Total: {metrics.get('tests_total', 0)}
 - Passed: {metrics.get('tests_passed', 0)}
@@ -91,13 +84,11 @@ def write_evidence(phase: str, metrics: dict) -> str:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Generate phase evidence artifacts")
-    parser.add_argument("--phase", required=True, help="Phase number e.g. 03")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--phase", required=True)
     args = parser.parse_args()
-
     phase = args.phase.zfill(2)
     print(f"Generating evidence for Phase {phase}")
-
     metrics = read_cached_metrics(phase)
     if not metrics:
         print(f"No metrics cache for phase {phase}. Writing minimal evidence.")
@@ -105,7 +96,6 @@ def main():
             "prd_metrics_addressed": [],
             "additional_observations": [f"Phase {phase} executed at {datetime.utcnow().isoformat()}"],
         }
-
     write_evidence(phase, metrics)
 
 

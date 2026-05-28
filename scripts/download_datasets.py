@@ -31,7 +31,7 @@ def count_csv_rows(path: Path) -> int:
     with open(path, "r", encoding="utf-8", errors="replace") as f:
         for _ in f:
             count += 1
-    return max(count - 1, 0)  # subtract header
+    return max(count - 1, 0)
 
 
 def download_ieee_cis_kaggle() -> bool:
@@ -46,8 +46,7 @@ def download_ieee_cis_kaggle() -> bool:
         result = subprocess.run(
             ["kaggle", "competitions", "download", "-c", "ieee-fraud-detection", "-p", str(IEEE_CIS_DIR)],
             env={**os.environ, "KAGGLE_USERNAME": username, "KAGGLE_KEY": key},
-            capture_output=True,
-            text=True,
+            capture_output=True, text=True,
         )
         if result.returncode != 0:
             print(f"Kaggle download failed: {result.stderr}")
@@ -73,19 +72,20 @@ def download_ieee_cis_huggingface() -> bool:
             if dest.exists():
                 print(f"Skipping {filename} — already present")
                 continue
-            for repo_id in ["daishen/ieee-cis-fraud-detection", "mrm8488/ieee-fraud-detection"]:
+            repos = [
+                "daishen/ieee-cis-fraud-detection",
+                "mrm8488/ieee-fraud-detection",
+            ]
+            for repo_id in repos:
                 try:
                     hf_hub_download(
-                        repo_id=repo_id,
-                        filename=filename,
-                        repo_type="dataset",
-                        local_dir=str(IEEE_CIS_DIR),
-                        token=token,
+                        repo_id=repo_id, filename=filename,
+                        repo_type="dataset", local_dir=str(IEEE_CIS_DIR), token=token,
                     )
                     print(f"{filename} downloaded from {repo_id}")
                     break
                 except Exception as e:
-                    print(f"  Failed {repo_id}: {e}")
+                    print(f"Failed {repo_id}/{filename}: {e}")
         return (IEEE_CIS_DIR / "train_transaction.csv").exists()
     except ImportError:
         print("huggingface_hub not installed. Run: pip install huggingface-hub")
@@ -117,18 +117,15 @@ def download_paysim() -> bool:
                         continue
                     filename = csv_files[0]
                 downloaded = hf_hub_download(
-                    repo_id=repo_id,
-                    filename=filename,
-                    repo_type="dataset",
-                    local_dir=str(PAYSIM_DIR),
-                    token=token,
+                    repo_id=repo_id, filename=filename,
+                    repo_type="dataset", local_dir=str(PAYSIM_DIR), token=token,
                 )
                 import shutil
                 shutil.copy(downloaded, dest)
                 print(f"PaySim downloaded from {repo_id}")
                 return True
             except Exception as e:
-                print(f"  Failed {repo_id}: {e}")
+                print(f"Failed {repo_id}: {e}")
         print("Could not download PaySim from any source")
         return False
     except ImportError:
@@ -156,12 +153,7 @@ def validate_and_update_checksums():
         size_mb = path.stat().st_size / (1024 * 1024)
         sha = sha256_file(path)
         rows = count_csv_rows(path)
-        manifest[key] = {
-            "sha256": sha,
-            "rows": rows,
-            "size_mb": round(size_mb, 1),
-            "source": "downloaded",
-        }
+        manifest[key] = {"sha256": sha, "rows": rows, "size_mb": round(size_mb, 1), "source": "downloaded"}
         print(f"  OK: {key} — {rows:,} rows, {size_mb:.1f} MB")
 
     with open(CHECKSUMS_FILE, "w") as f:

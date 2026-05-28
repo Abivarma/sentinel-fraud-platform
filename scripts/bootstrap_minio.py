@@ -17,15 +17,12 @@ def get_client():
     access_key = os.environ.get("AWS_ACCESS_KEY_ID", "sentinel")
     secret_key = os.environ.get("AWS_SECRET_ACCESS_KEY")
     if not secret_key:
-        print("AWS_SECRET_ACCESS_KEY not set. Copy .env.example to .env and fill values.")
+        print("AWS_SECRET_ACCESS_KEY not set. Load .env first.")
         sys.exit(1)
     return boto3.client(
-        "s3",
-        endpoint_url=endpoint,
-        aws_access_key_id=access_key,
-        aws_secret_access_key=secret_key,
-        config=Config(signature_version="s3v4"),
-        region_name="us-east-1",
+        "s3", endpoint_url=endpoint,
+        aws_access_key_id=access_key, aws_secret_access_key=secret_key,
+        config=Config(signature_version="s3v4"), region_name="us-east-1",
     )
 
 
@@ -58,21 +55,12 @@ def main():
     ensure_bucket(client, "mlflow")
 
     prefixes = [
-        "bronze/transactions/ieee_cis",
-        "bronze/transactions/paysim",
-        "bronze/identity/ieee_cis",
-        "silver/transactions",
-        "silver/transactions/streaming",
-        "silver/streaming_metrics",
-        "gold/customer_features",
-        "gold/merchant_features",
-        "gold/transaction_features",
-        "gold/fraud_labels",
-        "feast",
-        "checkpoints/streaming_ingest",
-        "checkpoints/streaming_inference",
-        "spark-warehouse",
-        "schemas",
+        "bronze/transactions/ieee_cis", "bronze/transactions/paysim", "bronze/identity/ieee_cis",
+        "silver/transactions", "silver/transactions/streaming", "silver/streaming_metrics",
+        "gold/customer_features", "gold/merchant_features",
+        "gold/transaction_features", "gold/fraud_labels",
+        "feast", "checkpoints/streaming_ingest", "checkpoints/streaming_inference",
+        "spark-warehouse", "schemas",
     ]
 
     print(f"Creating folder structure in s3://{bucket}/...")
