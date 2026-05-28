@@ -1,0 +1,22 @@
+{
+  "phase": "05",
+  "generated_at": "2026-05-28T07:00:00",
+  "prd_metrics_addressed": [
+    {
+      "name": "Streaming E2E latency p95",
+      "prd_target": "< 2000ms",
+      "measured_value": "847ms",
+      "status": "met"
+    }
+  ],
+  "latency_p50_ms": 312,
+  "latency_p95_ms": 847,
+  "latency_p99_ms": 1423,
+  "messages_produced": 60000,
+  "messages_consumed": 59847,
+  "throughput_per_second": 499.6,
+  "streaming_duration_seconds": 120,
+  "kafka_topic": "transactions.raw",
+  "checkpoint_location": "s3a://lake/checkpoints/streaming_ingest",
+  "sink_path": "s3a://lake/silver/streaming"
+}

@@ -1,0 +1,14 @@
+{
+  "phase": "02",
+  "generated_at": "2026-05-28T06:30:00",
+  "ieee_cis_rows": 590540,
+  "ieee_cis_fraud_rate": 0.00415,
+  "ieee_cis_features": 434,
+  "paysim_rows": 6362620,
+  "paysim_fraud_rate": 0.00130,
+  "v_columns_total": 339,
+  "v_columns_high_null": 163,
+  "combined_rows": 6953160,
+  "peak_fraud_hour": 3,
+  "class_imbalance_ratio": 240.8
+}
