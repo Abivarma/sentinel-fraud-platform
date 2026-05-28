@@ -1,0 +1,17 @@
+{
+  "phase": "12",
+  "prometheus_version": "v2.52.0",
+  "grafana_version": "10.4.3",
+  "dashboard_panels": 6,
+  "scrape_targets": ["sentinel-fraud-api", "redpanda", "minio", "prometheus"],
+  "scrape_interval_seconds": 15,
+  "api_scrape_interval_seconds": 5,
+  "retention_days": 7,
+  "key_metrics": [
+    "sentinel_fraud_alerts_total",
+    "sentinel_api_request_duration_seconds",
+    "sentinel_api_requests_total",
+    "sentinel_fraud_score"
+  ],
+  "prd_target": "Full observability with < 30s metric freshness"
+}

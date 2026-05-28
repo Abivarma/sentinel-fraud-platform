@@ -181,6 +181,21 @@ phase-10:
 ml-layer: phase-08 phase-10
 	@echo "=== ML + GenAI layer complete ==="
 
+# ─── Observability ────────────────────────────────────────────────────────────
+.PHONY: infra-observability
+infra-observability:
+	@set -a && source .env && set +a && \
+	docker compose --profile observability up -d prometheus grafana
+	@echo "Prometheus: http://localhost:9090"
+	@echo "Grafana:    http://localhost:3000  (admin / sentinel123)"
+
+.PHONY: phase-12
+phase-12:
+	@echo "=== Phase 12: Observability (Prometheus + Grafana) ==="
+	@echo "Dashboard config validated:"
+	@python -c "import json; d=json.load(open('observability/grafana/dashboards/fraud_platform.json')); print(f'  Dashboard: {d[\"title\"]} ({len(d[\"panels\"])} panels)')"
+	python scripts/generate_evidence.py --phase 12
+
 # ─── Tests ────────────────────────────────────────────────────────────────────
 .PHONY: test-unit
 test-unit:
