@@ -35,21 +35,29 @@ def count_csv_rows(path: Path) -> int:
 
 
 def download_ieee_cis_kaggle() -> bool:
+    # Kaggle CLI ≥2.x prefers KAGGLE_API_TOKEN; fall back to username+key pair
+    api_token = os.environ.get("KAGGLE_API_TOKEN")
     username = os.environ.get("KAGGLE_USERNAME")
     key = os.environ.get("KAGGLE_KEY")
-    if not username or not key:
-        print("KAGGLE_USERNAME or KAGGLE_KEY not set — skipping Kaggle download")
+    if not api_token and not (username and key):
+        print("No Kaggle credentials — skipping Kaggle download")
         return False
+    env = dict(os.environ)
+    if api_token:
+        env["KAGGLE_API_TOKEN"] = api_token
+    else:
+        env.update({"KAGGLE_USERNAME": username, "KAGGLE_KEY": key,
+                    "KAGGLE_API_TOKEN": key})
     try:
         import subprocess
         IEEE_CIS_DIR.mkdir(parents=True, exist_ok=True)
         result = subprocess.run(
             ["kaggle", "competitions", "download", "-c", "ieee-fraud-detection", "-p", str(IEEE_CIS_DIR)],
-            env={**os.environ, "KAGGLE_USERNAME": username, "KAGGLE_KEY": key},
-            capture_output=True, text=True,
+            env=env, capture_output=True, text=True,
         )
         if result.returncode != 0:
-            print(f"Kaggle download failed: {result.stderr}")
+            print(f"Kaggle download failed: {result.stderr.strip()}")
+            print("  → Accept competition rules at https://www.kaggle.com/competitions/ieee-fraud-detection/data")
             return False
         for zip_file in IEEE_CIS_DIR.glob("*.zip"):
             with zipfile.ZipFile(zip_file, "r") as z:
@@ -72,9 +80,10 @@ def download_ieee_cis_huggingface() -> bool:
             if dest.exists():
                 print(f"Skipping {filename} — already present")
                 continue
+            # These repos mirror the competition CSVs; update if they go offline
             repos = [
+                "vbinh/ieee-cis-fraud-detection",
                 "daishen/ieee-cis-fraud-detection",
-                "mrm8488/ieee-fraud-detection",
             ]
             for repo_id in repos:
                 try:
@@ -105,8 +114,8 @@ def download_paysim() -> bool:
             return True
         token = os.environ.get("HF_TOKEN")
         repos = [
+            ("theman10/paysim", "paysim.csv"),  # confirmed working
             ("ealtman2019/ibm-transactions-for-anti-money-laundering-aml", None),
-            ("mrpowers/paysim", "PS_20174392719_1491204439457_log.csv"),
         ]
         for repo_id, filename in repos:
             try:

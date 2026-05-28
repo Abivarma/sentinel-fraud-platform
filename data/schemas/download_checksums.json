@@ -12,9 +12,9 @@
     "source": "kaggle:ieee-fraud-detection or HuggingFace fallback"
   },
   "paysim/PS_log.csv": {
-    "sha256": "to_be_filled_after_first_download",
+    "sha256": "16910f90577b0d981bf8ff289714510bb89bc71bff7d3f220f024e287e4eea6b",
     "rows": 6362620,
-    "size_mb": 470,
-    "source": "HuggingFace dataset"
+    "size_mb": 470.7,
+    "source": "huggingface:theman10/paysim"
   }
 }
