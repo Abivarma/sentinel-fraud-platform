@@ -1,0 +1,19 @@
+{
+  "phase": "03",
+  "generated_at": "2026-05-28T05:58:00.137044",
+  "prd_metrics_addressed": [
+    {
+      "name": "Batch pipeline throughput",
+      "prd_target": ">= 1M transactions/minute",
+      "measured_value": "6,276,270 rows/min (IEEE-CIS txn)",
+      "status": "met"
+    }
+  ],
+  "additional_observations": [
+    "IEEE-CIS transactions: 590,540 rows",
+    "IEEE-CIS identity:     144,233 rows",
+    "PaySim:                6,362,620 rows",
+    "Total bronze rows:     7,097,393",
+    "Batch ID:              phase03-20260528-050832"
+  ]
+}

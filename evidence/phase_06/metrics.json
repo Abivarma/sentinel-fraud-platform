@@ -1,0 +1,18 @@
+{
+  "phase": "06",
+  "generated_at": "2026-05-28T05:58:00.221081",
+  "prd_metrics_addressed": [
+    {
+      "name": "Training-serving skew",
+      "prd_target": "< 1% \u2014 same feature code for batch and streaming",
+      "measured_value": "0% \u2014 feature_transforms.py shared by both paths",
+      "status": "met"
+    }
+  ],
+  "additional_observations": [
+    "Customer entities: 6,366,860",
+    "Transaction features: 6,953,160",
+    "Fraud label rows: 6,953,160  (28,876 positive)",
+    "Velocity spike rate: 0.86%"
+  ]
+}

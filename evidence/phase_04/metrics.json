@@ -1,0 +1,12 @@
+{
+  "phase": "04",
+  "generated_at": "2026-05-28T05:58:00.179195",
+  "prd_metrics_addressed": [],
+  "additional_observations": [
+    "IEEE-CIS silver: 590,540 rows",
+    "PaySim silver:   6,362,620 rows",
+    "Total silver:    6,953,160 rows",
+    "V-col imputation: 354 medians computed",
+    "Fraud total: 28,876 (0.415%)"
+  ]
+}
