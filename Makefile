@@ -160,6 +160,27 @@ data-layer: phase-00 phase-01 phase-02 phase-03
 	$(MAKE) phase-07
 	@echo "=== Data layer complete ==="
 
+# ─── ML / GenAI Phases ────────────────────────────────────────────────────────
+VENV_PYTHON = /opt/sentinel-venv/bin/python
+
+.PHONY: phase-08
+phase-08:
+	@echo "=== Phase 08: XGBoost Fraud Classifier ==="
+	@set -a && source .env && set +a && \
+	$(VENV_PYTHON) ml/training/phase_08_train_xgboost.py
+	python scripts/generate_evidence.py --phase 08
+
+.PHONY: phase-10
+phase-10:
+	@echo "=== Phase 10: LLM Fraud Explanations ==="
+	@set -a && source .env && set +a && \
+	cd genai/explainer && $(VENV_PYTHON) phase_10_explain_flagged.py
+	python scripts/generate_evidence.py --phase 10
+
+.PHONY: ml-layer
+ml-layer: phase-08 phase-10
+	@echo "=== ML + GenAI layer complete ==="
+
 # ─── Tests ────────────────────────────────────────────────────────────────────
 .PHONY: test-unit
 test-unit:

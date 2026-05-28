@@ -1,0 +1,168 @@
+[
+  {
+    "summary": "High-risk transaction flagged due to customer's 100% fraud rate in the last 30 days and round amount, a common trait in card testing attacks",
+    "risk_factors": [
+      "Customer has a 100% fraud rate in the last 30 days",
+      "Transaction amount is round, which is often used in card testing attacks"
+    ],
+    "recommended_action": "Reject the transaction and consider adding the customer to a high-risk monitoring list for further review",
+    "transaction_id": "2998180",
+    "fraud_score": 0.9996,
+    "model": "llama-3.3-70b-versatile",
+    "tokens_used": 481,
+    "true_label": 1,
+    "amount_log1p": 5.017279836814924,
+    "rank": 1,
+    "latency_ms": 978
+  },
+  {
+    "summary": "High-risk transaction flagged due to customer's historical fraud rate and round amount",
+    "risk_factors": [
+      "High customer 30-day fraud rate of 5.1%",
+      "Round amount, a common characteristic of card testing attacks"
+    ],
+    "recommended_action": "Decline the transaction and review customer account activity for potential fraudulent behavior",
+    "transaction_id": "3297397",
+    "fraud_score": 0.9866,
+    "model": "llama-3.3-70b-versatile",
+    "tokens_used": 457,
+    "true_label": 1,
+    "amount_log1p": 6.499787040655854,
+    "rank": 2,
+    "latency_ms": 431
+  },
+  {
+    "summary": "High-risk transaction flagged due to unusual timing, high customer fraud rate, and suspicious amount characteristics",
+    "risk_factors": [
+      "NIGHT-TIME TRANSACTION \u2014 unusual hours increase fraud risk",
+      "HIGH-RISK CUSTOMER \u2014 5.3% fraud rate in last 30 days",
+      "ROUND AMOUNT \u2014 often used in card testing attacks"
+    ],
+    "recommended_action": "Review and verify transaction with customer, consider requesting additional authentication or declining the transaction",
+    "transaction_id": "3247339",
+    "fraud_score": 0.9835,
+    "model": "llama-3.3-70b-versatile",
+    "tokens_used": 495,
+    "true_label": 1,
+    "amount_log1p": 6.579251212010101,
+    "rank": 3,
+    "latency_ms": 425
+  },
+  {
+    "summary": "High-risk transaction flagged due to high fraud probability score of 98.4%, driven primarily by the round amount, a common indicator of card testing attacks",
+    "risk_factors": [
+      "Round amount, often used in card testing attacks",
+      "High customer transaction velocity in the last 24 hours and 7 days, indicating potential account takeover or card testing activity"
+    ],
+    "recommended_action": "Reject the transaction and trigger a manual review of the customer's account activity to verify the legitimacy of the transactions",
+    "transaction_id": "3142635",
+    "fraud_score": 0.9835,
+    "model": "llama-3.3-70b-versatile",
+    "tokens_used": 469,
+    "true_label": 1,
+    "amount_log1p": 6.5337888379333435,
+    "rank": 4,
+    "latency_ms": 563
+  },
+  {
+    "summary": "High-risk transaction flagged due to unusual night-time activity and round amount, consistent with card testing patterns",
+    "risk_factors": [
+      "NIGHT-TIME TRANSACTION",
+      "ROUND AMOUNT",
+      "High customer transaction velocity over the last 7 days"
+    ],
+    "recommended_action": "Review and verify transaction with customer, consider requesting additional authentication or information to confirm legitimacy",
+    "transaction_id": "3142616",
+    "fraud_score": 0.9834,
+    "model": "llama-3.3-70b-versatile",
+    "tokens_used": 455,
+    "true_label": 1,
+    "amount_log1p": 6.586171654854675,
+    "rank": 5,
+    "latency_ms": 472
+  },
+  {
+    "summary": "The transaction has been flagged with a high fraud probability of 98.3% due to a combination of risk factors, including the transaction occurring at night, the customer's high historical fraud rate, and the transaction amount being a round number and significantly higher than the customer's average",
+    "risk_factors": [
+      "NIGHT-TIME TRANSACTION",
+      "HIGH-RISK CUSTOMER",
+      "ROUND AMOUNT",
+      "AMOUNT SPIKE"
+    ],
+    "recommended_action": "Reject the transaction and request additional verification from the customer to confirm the authenticity of the transaction",
+    "transaction_id": "3270686",
+    "fraud_score": 0.9829,
+    "model": "llama-3.3-70b-versatile",
+    "tokens_used": 531,
+    "true_label": 1,
+    "amount_log1p": 6.318968113746434,
+    "rank": 6,
+    "latency_ms": 471
+  },
+  {
+    "summary": "High-risk transaction flagged due to round amount and high model confidence",
+    "risk_factors": [
+      "Round amount, a common indicator of card testing attacks",
+      "High fraud probability score of 98.3% from the ML model"
+    ],
+    "recommended_action": "Decline the transaction and trigger a review of the customer's recent activity for potential card testing patterns",
+    "transaction_id": "3142633",
+    "fraud_score": 0.9827,
+    "model": "llama-3.3-70b-versatile",
+    "tokens_used": 441,
+    "true_label": 1,
+    "amount_log1p": 6.5337888379333435,
+    "rank": 7,
+    "latency_ms": 465
+  },
+  {
+    "summary": "High-risk transaction flagged due to unusual timing and amount characteristics",
+    "risk_factors": [
+      "Transaction occurred at night-time, which is an unusual hour for the customer",
+      "The transaction amount is a round number, often used in card testing attacks"
+    ],
+    "recommended_action": "Review and verify the transaction with the customer to confirm its legitimacy",
+    "transaction_id": "3145479",
+    "fraud_score": 0.9804,
+    "model": "llama-3.3-70b-versatile",
+    "tokens_used": 450,
+    "true_label": 1,
+    "amount_log1p": 6.318968113746434,
+    "rank": 8,
+    "latency_ms": 493
+  },
+  {
+    "summary": "High-risk transaction flagged due to unusual timing, customer history, and suspicious amount characteristics",
+    "risk_factors": [
+      "NIGHT-TIME TRANSACTION \u2014 unusual hours increase fraud risk",
+      "HIGH-RISK CUSTOMER \u2014 5.1% fraud rate in last 30 days",
+      "ROUND AMOUNT \u2014 often used in card testing attacks"
+    ],
+    "recommended_action": "Reject the transaction and request additional verification from the customer to confirm the legitimacy of the transaction",
+    "transaction_id": "3247205",
+    "fraud_score": 0.9802,
+    "model": "llama-3.3-70b-versatile",
+    "tokens_used": 495,
+    "true_label": 1,
+    "amount_log1p": 6.579251212010101,
+    "rank": 9,
+    "latency_ms": 407
+  },
+  {
+    "summary": "High-risk transaction flagged due to high fraud probability and suspicious characteristics",
+    "risk_factors": [
+      "High fraud probability score of 97.9%",
+      "Round amount, a common trait in card testing attacks",
+      "Recent high transaction volume, with 179 transactions in the last 7 days"
+    ],
+    "recommended_action": "Decline the transaction and review customer account activity for potential fraud patterns",
+    "transaction_id": "3168558",
+    "fraud_score": 0.9795,
+    "model": "llama-3.3-70b-versatile",
+    "tokens_used": 449,
+    "true_label": 1,
+    "amount_log1p": 5.583496308781699,
+    "rank": 10,
+    "latency_ms": 483
+  }
+]

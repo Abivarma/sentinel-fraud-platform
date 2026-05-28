@@ -1,0 +1,19 @@
+{
+  "phase": "10",
+  "generated_at": "2026-05-28T08:58:30.400765",
+  "prd_metrics_addressed": [
+    {
+      "name": "Fraud explanation latency",
+      "prd_target": "< 3 seconds per explanation",
+      "measured_value": "519ms average",
+      "status": "met"
+    }
+  ],
+  "additional_observations": [
+    "Explanations generated: 10",
+    "Average latency: 519ms",
+    "Total tokens used: 4,723",
+    "Model: llama-3.3-70b-versatile",
+    "Structured JSON output: summary + risk_factors + recommended_action"
+  ]
+}
